@@ -7,8 +7,9 @@
 #include <vector>
 
 #include "Loader.h"
-#include "Mesh.hpp"
+#include "Model.hpp"
 #include "Core.hpp"
+#include "Object.hpp"
 #include "ShaderManager.hpp"
 
 
@@ -22,5 +23,6 @@ public:
 
 private:
 	Model model = Model();
+	ES::Plugin::Object::Component::Transform transform = ES::Plugin::Object::Component::Transform();
 	void generateMesh();
 };

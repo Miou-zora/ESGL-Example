@@ -15,8 +15,12 @@ Quad::Quad()
 {
 	// Generate the vertex data
 	generateMesh();
-
-	model.generateGlBuffers();
+	
+	model.shaderName = "default";
+	model.materialName = "default";
+	transform.position = glm::vec3(0.0f, -1.0f, 0.0f);
+	transform.rotation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+	transform.scale = glm::vec3(10.0f, 10.0f, 10.0f);
 }
 
 void Quad::draw(glm::mat4 projection, glm::mat4 view, ES::Engine::Core &core) 
@@ -28,9 +32,7 @@ void Quad::draw(glm::mat4 projection, glm::mat4 view, ES::Engine::Core &core)
 	glUniform3fv(shader.uniform("Material.Kd"), 1, glm::value_ptr(material.Kd));
 	glUniform3fv(shader.uniform("Material.Ks"), 1, glm::value_ptr(material.Ks));
 	glUniform1fv(shader.uniform("Material.Shiness"), 1, &material.Shiness);
-	glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-	modelmat = glm::rotate(modelmat, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
-	modelmat = glm::scale(modelmat, glm::vec3(10.0f, 10.0f, 10.0f));
+	glm::mat4 modelmat = transform.getTransformationMatrix();
 	glm::mat4 mview = view * modelmat;
 	glm::mat4 mvp = projection * view * modelmat;
 	glm::mat4 imvp = glm::inverse(modelmat);
@@ -38,7 +40,7 @@ void Quad::draw(glm::mat4 projection, glm::mat4 view, ES::Engine::Core &core)
 	glUniformMatrix3fv(shader.uniform("NormalMatrix"), 1, GL_FALSE, glm::value_ptr(nmat));
 	glUniformMatrix4fv(shader.uniform("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(modelmat));
 	glUniformMatrix4fv(shader.uniform("MVP"), 1, GL_FALSE, glm::value_ptr(mvp));
-	model.draw();
+	model.mesh.draw();
 	shader.disable();
 }
 
@@ -69,10 +71,10 @@ void Quad::generateMesh()
 		{2, 1, 3}
 	};
 
-	model.vertices = vertices;
-	model.normals = normals;
-	model.triIndices = triIndices;
-	model.shaderName = "default";
-	model.materialName = "default";
+	model.mesh.vertices = vertices;
+	model.mesh.normals = normals;
+	model.mesh.triIndices = triIndices;
+	
+	model.mesh.generateGlBuffers();
 }
 

@@ -12,19 +12,11 @@
 #include "Loader.h"
 #include "Material.hpp"
 
-class Model {
+class Mesh {
     public:
-        Model() = default;
-        ~Model()
-        {
-            // glDeleteBuffers(1, &VBO_position);
-            // glDeleteBuffers(1, &VBO_normal);
-            // glDeleteBuffers(1, &IBO);
-            // glDeleteVertexArrays(1, &VAO);
-        }
+        Mesh() = default;
+        ~Mesh() = default;
 
-        std::string shaderName;
-        std::string materialName;
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
         std::vector<glm::vec<3, unsigned int>> triIndices;
@@ -34,6 +26,14 @@ class Model {
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, triIndices.size()  * sizeof(glm::vec<3, unsigned int>), GL_UNSIGNED_INT, 0);
             glBindVertexArray(0);
+        }
+
+        void destroyGlBuffers()
+        {
+            glDeleteBuffers(1, &VBO_position);
+            glDeleteBuffers(1, &VBO_normal);
+            glDeleteBuffers(1, &IBO);
+            glDeleteVertexArrays(1, &VAO);
         }
 
         void generateGlBuffers() 

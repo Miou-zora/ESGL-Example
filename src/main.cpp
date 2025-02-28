@@ -6,6 +6,7 @@
  * - We don't really know what we can do with Core.
  * - No clear way to run something when closing the program (like cleaning up resources, glfw context).
  * - We can't use Plugin::AssetsManager with string as key.
+ * - Mesh of E² is too vague and not really useful.
  */
 
 #include <iostream>
