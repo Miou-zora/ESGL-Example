@@ -8,7 +8,8 @@
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/constants.hpp>
-
+#include "Core.hpp"
+#include "ShaderManager.hpp"
 #include <iostream>
 
 #include <cstdio>
@@ -68,7 +69,6 @@ VBOTorus::VBOTorus(float outerRadius, float innerRadius, int nsides, int nrings)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces * 6 * sizeof(unsigned int), el, GL_STATIC_DRAW);
 
     glBindVertexArray(0);
-	std::cout << "Torus created" << std::endl;
 
     delete [] v;
     delete [] n;
@@ -84,8 +84,10 @@ VBOTorus::~VBOTorus()
     glDeleteVertexArrays(1, &vaoHandle);
 }
 
-void VBOTorus::draw(glm::mat4 projection, glm::mat4 view, ShaderProgram *shader) const 
+void VBOTorus::draw(glm::mat4 projection, glm::mat4 view, ES::Engine::Core &core) const 
 {
+    auto shader = &core.GetResource<ShaderManager>().get("default");
+    shader->use();
     glUniform3fv(shader->uniform("Material.Ka"), 1, glm::value_ptr(mat.Ka));
     glUniform3fv(shader->uniform("Material.Kd"), 1, glm::value_ptr(mat.Kd));
     glUniform3fv(shader->uniform("Material.Ks"), 1, glm::value_ptr(mat.Ks));
@@ -102,6 +104,7 @@ void VBOTorus::draw(glm::mat4 projection, glm::mat4 view, ShaderProgram *shader)
     glBindVertexArray(vaoHandle);
 	glDrawElements(GL_TRIANGLES, faces * 6 * sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+    shader->disable();
 }
 
 void VBOTorus::generateVerts(GLfloat * verts, GLfloat * norms, unsigned int * el,

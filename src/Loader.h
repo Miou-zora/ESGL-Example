@@ -125,6 +125,7 @@ private:
 		vertexShaderId = compileShader(vertexShaderSource, GL_VERTEX_SHADER);
 		fragmentShaderId = compileShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
 
+
 		// Attach the compiled shaders to the shader program
 		glAttachShader(programId, vertexShaderId);
 		glAttachShader(programId, fragmentShaderId);

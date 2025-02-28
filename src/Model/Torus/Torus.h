@@ -5,6 +5,7 @@
 #include <glm/mat4x4.hpp>
 #include "Loader.h"
 #include "Material.hpp"
+#include "Core.hpp"
 
 
 class VBOTorus 
@@ -21,7 +22,7 @@ public:
     VBOTorus() : VBOTorus(0.7f, 0.3f, 50, 50) {}
     VBOTorus(float, float, int, int);
 	virtual ~VBOTorus();
-	void draw(glm::mat4 projection, glm::mat4 view, ShaderProgram *shader) const;
+	void draw(glm::mat4 projection, glm::mat4 view, ES::Engine::Core &core) const;
 };
 
 #endif // VBOTORUS_H
