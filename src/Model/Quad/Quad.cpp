@@ -8,7 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-
+#include "MaterialCache.hpp"
 #include <iostream>
 
 Quad::Quad()
@@ -21,12 +21,13 @@ Quad::Quad()
 
 void Quad::draw(glm::mat4 projection, glm::mat4 view, ES::Engine::Core &core) 
 {
-	auto shader = &core.GetResource<ShaderManager>().get("default");
-	shader->use();
-	glUniform3fv(shader->uniform("Material.Ka"), 1, glm::value_ptr(model.mat.Ka));
-	glUniform3fv(shader->uniform("Material.Kd"), 1, glm::value_ptr(model.mat.Kd));
-	glUniform3fv(shader->uniform("Material.Ks"), 1, glm::value_ptr(model.mat.Ks));
-	glUniform1fv(shader->uniform("Material.Shiness"), 1, &model.mat.Shiness);
+	auto &shader = core.GetResource<ShaderManager>().get(model.shaderName);
+	const auto material = core.GetResource<MaterialCache>().get(model.materialName);
+	shader.use();
+	glUniform3fv(shader.uniform("Material.Ka"), 1, glm::value_ptr(material.Ka));
+	glUniform3fv(shader.uniform("Material.Kd"), 1, glm::value_ptr(material.Kd));
+	glUniform3fv(shader.uniform("Material.Ks"), 1, glm::value_ptr(material.Ks));
+	glUniform1fv(shader.uniform("Material.Shiness"), 1, &material.Shiness);
 	glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 	modelmat = glm::rotate(modelmat, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
 	modelmat = glm::scale(modelmat, glm::vec3(10.0f, 10.0f, 10.0f));
@@ -34,11 +35,11 @@ void Quad::draw(glm::mat4 projection, glm::mat4 view, ES::Engine::Core &core)
 	glm::mat4 mvp = projection * view * modelmat;
 	glm::mat4 imvp = glm::inverse(modelmat);
 	glm::mat3 nmat = glm::mat3(glm::transpose(imvp)); //normal matrix
-	glUniformMatrix3fv(shader->uniform("NormalMatrix"), 1, GL_FALSE, glm::value_ptr(nmat));
-	glUniformMatrix4fv(shader->uniform("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(modelmat));
-	glUniformMatrix4fv(shader->uniform("MVP"), 1, GL_FALSE, glm::value_ptr(mvp));
+	glUniformMatrix3fv(shader.uniform("NormalMatrix"), 1, GL_FALSE, glm::value_ptr(nmat));
+	glUniformMatrix4fv(shader.uniform("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(modelmat));
+	glUniformMatrix4fv(shader.uniform("MVP"), 1, GL_FALSE, glm::value_ptr(mvp));
 	model.draw();
-	shader->disable();
+	shader.disable();
 }
 
 void Quad::generateMesh()
@@ -71,9 +72,7 @@ void Quad::generateMesh()
 	model.vertices = vertices;
 	model.normals = normals;
 	model.triIndices = triIndices;
-	model.mat.Shiness = 180;
-	model.mat.Ka = vec3(0.2, 0.2, 0.2);
-	model.mat.Kd = vec3(1, 0.3, 0.1);
-	model.mat.Ks = vec3(0.4, 0.4, 0.4);
+	model.shaderName = "default";
+	model.materialName = "default";
 }
 

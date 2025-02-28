@@ -23,8 +23,8 @@ class Model {
             // glDeleteVertexArrays(1, &VAO);
         }
 
-        ShaderProgram *shader;
-        Material mat = Material();
+        std::string shaderName;
+        std::string materialName;
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
         std::vector<glm::vec<3, unsigned int>> triIndices;

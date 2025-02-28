@@ -181,7 +181,7 @@ namespace ESGL {
         glfwPollEvents();
     }
     
-    void LoadShader(ES::Engine::Core &core)
+    void LoadShaderManager(ES::Engine::Core &core)
     {
         ShaderManager &shaderManager = core.RegisterResource<ShaderManager>(ShaderManager());
         ShaderProgram &program = shaderManager.add("default");
@@ -231,7 +231,7 @@ int main()
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::GLFWEnableVSync);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::InitCustomWindow);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadMaterialCache);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadShader);
+    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadShaderManager);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupShaderUniforms);
 
     core.RunSystems();
