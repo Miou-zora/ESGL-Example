@@ -35,10 +35,10 @@ VBOTorus::VBOTorus(float outerRadius, float innerRadius, int nsides, int nrings)
     // Generate the vertex data
     generateVerts(v, n, el, outerRadius, innerRadius);
 
-    0.329412, 0.223529, 0.027451, 1.0,
-    0.780392, 0.568627, 0.113725, 1.0,
-    0.992157, 0.941176, 0.807843, 1.0,
-    27.89743616,
+    // 0.329412, 0.223529, 0.027451, 1.0,
+    // 0.780392, 0.568627, 0.113725, 1.0,
+    // 0.992157, 0.941176, 0.807843, 1.0,
+    // 27.89743616,
 
     mat.Shiness = 180.f;
     mat.Ka = glm::vec3(0.1, 0.1, 0.1);

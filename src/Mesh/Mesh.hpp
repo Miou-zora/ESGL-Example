@@ -17,10 +17,10 @@ class Mesh {
         Mesh() = default;
         ~Mesh()
         {
-            glDeleteBuffers(1, &VBO_position);
-            glDeleteBuffers(1, &VBO_normal);
-            glDeleteBuffers(1, &IBO);
-            glDeleteVertexArrays(1, &VAO);
+            // glDeleteBuffers(1, &VBO_position);
+            // glDeleteBuffers(1, &VBO_normal);
+            // glDeleteBuffers(1, &IBO);
+            // glDeleteVertexArrays(1, &VAO);
         }
 
         ShaderProgram *shader;
@@ -31,11 +31,6 @@ class Mesh {
 
         void draw()
         {
-            glUniform3fv(shader->uniform("Material.Ka"), 1, glm::value_ptr(mat.Ka));
-            glUniform3fv(shader->uniform("Material.Kd"), 1, glm::value_ptr(mat.Kd));
-            glUniform3fv(shader->uniform("Material.Ks"), 1, glm::value_ptr(mat.Ks));
-            glUniform1fv(shader->uniform("Material.Shiness"), 1, &mat.Shiness);
-
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, triIndices.size()  * sizeof(glm::vec<3, unsigned int>), GL_UNSIGNED_INT, 0);
             glBindVertexArray(0);
