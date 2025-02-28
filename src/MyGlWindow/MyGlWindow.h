@@ -35,6 +35,7 @@ public:
 	};
 	void UpdateMatrices(ES::Engine::Core &core);
 	void SetupLights(ES::Engine::Core &core);
+	void RenderCustomMeshes(ES::Engine::Core &core);
 	void RenderMeshes(ES::Engine::Core &core);
 private:
 	// Cow* m_cow;

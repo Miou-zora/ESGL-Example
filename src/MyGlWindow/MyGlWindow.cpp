@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include "Core.hpp"
 #include "ShaderManager.hpp"
+#include "MaterialCache.hpp"
 
 MyGlWindow::MyGlWindow(int w, int h, ES::Engine::Core &core) : m_size(w, h) {
 	m_viewer = new Viewer(glm::vec3(5, 5, 5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), 45.0f, (float)w / h);
@@ -75,16 +76,35 @@ void MyGlWindow::SetupLights(ES::Engine::Core &core)
 	core.GetResource<ShaderManager>().disable("default");
 }
 
-void MyGlWindow::RenderMeshes(ES::Engine::Core &core)
+void MyGlWindow::RenderCustomMeshes(ES::Engine::Core &core)
 {
 	if (m_torus == nullptr) {
 		m_torus = new VBOTorus();
 	}
 	if (m_torus) m_torus->draw(_projection, _view, core);
-	if (m_quad == nullptr) {
-		m_quad = new Quad();
-	}
-	if (m_quad) m_quad->draw(_projection, _view, core);
+}
+
+void MyGlWindow::RenderMeshes(ES::Engine::Core &core)
+{
+	core.GetRegistry().view<Model, ES::Plugin::Object::Component::Transform>().each([&](auto entity, Model &model, ES::Plugin::Object::Component::Transform &transform) {
+		auto &shader = core.GetResource<ShaderManager>().get(model.shaderName);
+		const auto material = core.GetResource<MaterialCache>().get(model.materialName);
+		shader.use();
+		glUniform3fv(shader.uniform("Material.Ka"), 1, glm::value_ptr(material.Ka));
+		glUniform3fv(shader.uniform("Material.Kd"), 1, glm::value_ptr(material.Kd));
+		glUniform3fv(shader.uniform("Material.Ks"), 1, glm::value_ptr(material.Ks));
+		glUniform1fv(shader.uniform("Material.Shiness"), 1, &material.Shiness);
+		glm::mat4 modelmat = transform.getTransformationMatrix();
+		glm::mat4 mview = _view * modelmat;
+		glm::mat4 mvp = _projection * _view * modelmat;
+		glm::mat4 imvp = glm::inverse(modelmat);
+		glm::mat3 nmat = glm::mat3(glm::transpose(imvp)); //normal matrix
+		glUniformMatrix3fv(shader.uniform("NormalMatrix"), 1, GL_FALSE, glm::value_ptr(nmat));
+		glUniformMatrix4fv(shader.uniform("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(modelmat));
+		glUniformMatrix4fv(shader.uniform("MVP"), 1, GL_FALSE, glm::value_ptr(mvp));
+		model.mesh.draw();
+		shader.disable();
+	});
 }
 
 void MyGlWindow::draw(ES::Engine::Core &core) {
@@ -94,5 +114,6 @@ void MyGlWindow::draw(ES::Engine::Core &core) {
 	GLEnableDepth(core);
 	GLEnableCullFace(core);
 	SetupLights(core);
+	RenderCustomMeshes(core);
 	RenderMeshes(core);
 }

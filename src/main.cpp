@@ -14,6 +14,7 @@
 #include "GLFW/glfw3.h"
 #include "Core.hpp"
 #include "Object.hpp"
+#include "Entity.hpp"
 
 #include "MyGlWindow.h"
 #include "ShaderManager.hpp"
@@ -214,6 +215,58 @@ namespace ESGL {
         auto &materialCache = core.RegisterResource<MaterialCache>({});
         materialCache.add("default");
     }
+
+    void TESTAddQuad(ES::Engine::Core &core)
+    {
+        using namespace glm;
+
+        auto quad = ES::Engine::Entity(core.GetRegistry().create());
+
+        Model model;
+
+        model.shaderName = "default";
+        model.materialName = "default";
+
+        Mesh mesh;
+
+        std::vector<vec3> vertices;
+        std::vector<vec3> normals;
+        std::vector<vec<3, unsigned int>> triIndices;
+
+        vertices = {
+            vec3(-1,  1, 0),
+            vec3( 1,  1, 0),
+            vec3(-1, -1, 0),
+            vec3( 1, -1, 0)
+        };
+
+        normals = {
+            vec3(0, 0, -1),
+            vec3(0, 0, -1),
+            vec3(0, 0, -1),
+            vec3(0, 0, -1)
+        };
+
+        triIndices = {
+            {2, 0, 1},
+            {2, 1, 3}
+        };
+
+        mesh.vertices = vertices;
+        mesh.normals = normals;
+        mesh.triIndices = triIndices;
+        mesh.generateGlBuffers();
+
+        model.mesh = mesh;
+
+
+        quad.AddComponent<Model>(core, model);
+        auto &transform = quad.AddComponent<ES::Plugin::Object::Component::Transform>(core, {});
+        
+        transform.position = glm::vec3(0.0f, -1.0f, 0.0f);
+        transform.rotation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+        transform.scale = glm::vec3(10.0f, 10.0f, 10.0f);
+    }
 }
 
 
@@ -234,6 +287,7 @@ int main()
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadMaterialCache);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadShaderManager);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupShaderUniforms);
+    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::TESTAddQuad);
 
     core.RunSystems();
 
