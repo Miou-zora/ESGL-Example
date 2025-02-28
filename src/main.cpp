@@ -5,15 +5,18 @@
  * - Can't report any errors from systems (like OpenGL errors). For example, initialization systems (like systems that use glfw functions that can return errors like "glfwInit") should raise an error if an error occured.
  * - We don't really know what we can do with Core.
  * - No clear way to run something when closing the program (like cleaning up resources, glfw context).
+ * - We can't use Plugin::AssetsManager with string as key.
  */
 
 #include <iostream>
 #include "GL/gl3w.h"
 #include "GLFW/glfw3.h"
 #include "Core.hpp"
+#include "Object.hpp"
 
 #include "MyGlWindow.h"
 #include "ShaderManager.hpp"
+#include "MaterialCache.hpp"
 
 const int DEFAULT_WIDTH = 800;
 const int DEFAULT_HEIGHT = 800;
@@ -204,6 +207,12 @@ namespace ESGL {
     
         m_shaderProgram.addUniform("CamPos");
     }
+
+    void LoadMaterialCache(ES::Engine::Core &core)
+    {
+        auto &materialCache = core.RegisterResource<MaterialCache>({});
+        materialCache.add("default");
+    }
 }
 
 
@@ -221,6 +230,7 @@ int main()
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::CheckGL3WVersion);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::GLFWEnableVSync);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::InitCustomWindow);
+    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadMaterialCache);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadShader);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupShaderUniforms);
 

@@ -21,6 +21,6 @@ public:
 	void draw(glm::mat4 projection, glm::mat4 view, ES::Engine::Core &core);
 
 private:
-	Mesh mesh = Mesh();
+	Model model = Model();
 	void generateMesh();
 };

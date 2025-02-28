@@ -21,6 +21,7 @@ target("ESGL")
     add_includedirs("$(projectdir)/src/Viewer/")
     add_includedirs("$(projectdir)/src/Mesh/")
     add_includedirs("$(projectdir)/src/ShaderManager/")
+    add_includedirs("$(projectdir)/src/MaterialCache/")
     add_headerfiles("$(projectdir)/src/**.h")
 
 

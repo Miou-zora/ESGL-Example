@@ -12,10 +12,10 @@
 #include "Loader.h"
 #include "Material.hpp"
 
-class Mesh {
+class Model {
     public:
-        Mesh() = default;
-        ~Mesh()
+        Model() = default;
+        ~Model()
         {
             // glDeleteBuffers(1, &VBO_position);
             // glDeleteBuffers(1, &VBO_normal);
