@@ -394,10 +394,16 @@ namespace ESGL {
         for (int i = 0; i < 5; i++) {
             glUniform4fv(shaderProgram.uniform("Light[" + std::to_string(i) + "].Position"), 1, glm::value_ptr(light[i].Position));
             glUniform3fv(shaderProgram.uniform("Light[" + std::to_string(i) + "].Intensity"), 1, glm::value_ptr(light[i].Intensity));
-        }
-        glUniform3fv(shaderProgram.uniform("CamPos"), 1, glm::value_ptr(core.GetResource<Camera>().viewer.getViewPoint()));
-        
+        }        
         core.GetResource<ShaderManager>().disable("default");
+    }
+
+    void SetupCamera(ES::Engine::Core &core)
+    {
+        auto &shaderProgram = core.GetResource<ShaderManager>().get("default");
+        shaderProgram.use();
+        glUniform3fv(shaderProgram.uniform("CamPos"), 1, glm::value_ptr(core.GetResource<Camera>().viewer.getViewPoint()));
+        shaderProgram.disable();
     }
     
     void RenderMeshes(ES::Engine::Core &core)
@@ -445,6 +451,7 @@ int main()
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadShaderManager);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::CreateCamera);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupShaderUniforms);
+
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::TESTAddQuad);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::TESTAddTorus);
 
@@ -459,6 +466,7 @@ int main()
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLClearDepth);
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLEnableDepth);
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLEnableCullFace);
+    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::SetupCamera);
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::SetupLights);
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::RenderMeshes);
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::SwapBuffers);
