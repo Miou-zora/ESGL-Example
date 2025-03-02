@@ -14,15 +14,13 @@ target("ESGL")
 
 
     add_includedirs("$(projectdir)/src/")
-    add_includedirs("$(projectdir)/src/MyGlWindow/")
     add_includedirs("$(projectdir)/src/Material/")
     add_includedirs("$(projectdir)/src/Model/")
-    add_includedirs("$(projectdir)/src/Model/Torus/")
-    add_includedirs("$(projectdir)/src/Model/Quad/")
     add_includedirs("$(projectdir)/src/Viewer/")
     add_includedirs("$(projectdir)/src/Mesh/")
     add_includedirs("$(projectdir)/src/ShaderManager/")
     add_includedirs("$(projectdir)/src/MaterialCache/")
+    add_includedirs("$(projectdir)/src/Camera/")
     add_headerfiles("$(projectdir)/src/**.h")
 
 

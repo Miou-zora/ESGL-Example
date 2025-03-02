@@ -16,9 +16,10 @@
 #include "Object.hpp"
 #include "Entity.hpp"
 
-#include "MyGlWindow.h"
 #include "ShaderManager.hpp"
 #include "MaterialCache.hpp"
+#include "Camera/Camera.hpp"
+#include "Model.hpp"
 
 const int DEFAULT_WIDTH = 800;
 const int DEFAULT_HEIGHT = 800;
@@ -131,11 +132,6 @@ namespace ESGL {
         glfwSwapInterval(1);
     }
 
-    void InitCustomWindow(ES::Engine::Core &core)
-    {
-        core.RegisterResource<MyGlWindow>(MyGlWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, core));
-    }
-
     void UpdatePosCursor(ES::Engine::Core &core)
     {
         auto &currentMousePos = core.GetResource<ESGL::Buttons>().currentMousePos;
@@ -149,28 +145,23 @@ namespace ESGL {
         auto &lastMousePos = buttons.lastMousePos;
         auto &currentMousePos = buttons.currentMousePos;
         auto &mouseButtons = buttons.mouse;
-        MyGlWindow &window = core.GetResource<MyGlWindow>();
+        auto &camera = core.GetResource<Camera>();
         if (mouseButtons[GLFW_MOUSE_BUTTON_LEFT].pressed) {
-            float fractionChangeX = static_cast<float>(currentMousePos.x - lastMousePos.x) / static_cast<float>(window.getSize().x);
-            float fractionChangeY = static_cast<float>(lastMousePos.y - currentMousePos.y) / static_cast<float>(window.getSize().y);
-            window.getViewer()->rotate(fractionChangeX, fractionChangeY);
+            float fractionChangeX = static_cast<float>(currentMousePos.x - lastMousePos.x) / static_cast<float>(camera.size.x);
+            float fractionChangeY = static_cast<float>(lastMousePos.y - currentMousePos.y) / static_cast<float>(camera.size.y);
+            camera.viewer.rotate(fractionChangeX, fractionChangeY);
         }
         else if (mouseButtons[GLFW_MOUSE_BUTTON_MIDDLE].pressed) {
-            float fractionChangeY = static_cast<float>(lastMousePos.y - currentMousePos.y) / static_cast<float>(window.getSize().y);
-            window.getViewer()->zoom(fractionChangeY);
+            float fractionChangeY = static_cast<float>(lastMousePos.y - currentMousePos.y) / static_cast<float>(camera.size.y);
+            camera.viewer.zoom(fractionChangeY);
         }
         else if (mouseButtons[GLFW_MOUSE_BUTTON_RIGHT].pressed) {
-            float fractionChangeX = static_cast<float>(currentMousePos.x - lastMousePos.x) / static_cast<float>(window.getSize().x);
-            float fractionChangeY = static_cast<float>(lastMousePos.y - currentMousePos.y) / static_cast<float>(window.getSize().y);
-            window.getViewer()->translate(-fractionChangeX, -fractionChangeY, true);
+            float fractionChangeX = static_cast<float>(currentMousePos.x - lastMousePos.x) / static_cast<float>(camera.size.x);
+            float fractionChangeY = static_cast<float>(lastMousePos.y - currentMousePos.y) / static_cast<float>(camera.size.y);
+            camera.viewer.translate(-fractionChangeX, -fractionChangeY, true);
         }
         lastMousePos.x = currentMousePos.x;
         lastMousePos.y = currentMousePos.y;
-    }
-
-    void Draw(ES::Engine::Core &core)
-    {
-        core.GetResource<MyGlWindow>().draw(core);
     }
 
     void SwapBuffers(ES::Engine::Core &core)
@@ -267,6 +258,172 @@ namespace ESGL {
         transform.rotation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
         transform.scale = glm::vec3(10.0f, 10.0f, 10.0f);
     }
+
+    void TESTGenerateData(Mesh &mesh, float outerRadius, float innerRadius)
+    {
+        using namespace glm;
+
+        float TWOPI = 2 * glm::pi<float>();
+
+        float ringFactor  = (float)(TWOPI / 100);
+        float sideFactor = (float)(TWOPI / 100);
+        int idx = 0, tidx = 0;
+        for( int ring = 0; ring <= 100; ring++ ) {
+            float u = ring * ringFactor;
+            float cu = cos(u);
+            float su = sin(u);
+            for( int side = 0; side < 100; side++ ) {
+                float v = side * sideFactor;
+                float cv = cos(v);
+                float sv = sin(v);
+                float r = (outerRadius + innerRadius * cv);
+                mesh.vertices.push_back(vec3(r * cu, r * su, innerRadius * sv));
+                mesh.normals.push_back(vec3(cv * cu * r, cv * su * r, sv * r));
+                // Normalize
+                float len = sqrt( mesh.normals[idx].x * mesh.normals[idx].x +
+                                mesh.normals[idx].y * mesh.normals[idx].y +
+                                mesh.normals[idx].z * mesh.normals[idx].z );
+                mesh.normals[idx] /= len;
+                idx += 1;
+            }
+        }
+
+        idx = 0;
+        for( int ring = 0; ring < 100; ring++ ) {
+            int ringStart = ring * 100;
+            int nextRingStart = (ring + 1) * 100;
+            for( int side = 0; side < 100; side++ ) {
+                int nextSide = (side+1) % 100;
+                // The quad
+                mesh.triIndices.push_back({ringStart + side, nextRingStart + side, nextRingStart + nextSide});
+                mesh.triIndices.push_back({ringStart + side, nextRingStart + nextSide, ringStart + nextSide});
+            }
+        }
+    }
+        
+    void TESTAddTorus(ES::Engine::Core &core)
+    {
+        using namespace glm;
+
+        auto torus = ES::Engine::Entity(core.GetRegistry().create());
+        auto &mat = core.GetResource<MaterialCache>().add("TESTTorus");
+        mat.Shiness = 180.0f;
+        mat.Ka = vec3(0.1, 0.1, 0.1);
+        mat.Kd = vec3(0.4, 0.4, 0.4);
+        mat.Ks = vec3(0.9,0.9, 0.9);
+        
+
+        Model model;
+
+        model.shaderName = "default";
+        model.materialName = "TESTTorus";
+
+        Mesh mesh;
+
+        TESTGenerateData(mesh, 1.5f, 0.3f);
+        mesh.generateGlBuffers();
+
+        model.mesh = mesh;
+
+
+        torus.AddComponent<Model>(core, model);
+        auto &transform = torus.AddComponent<ES::Plugin::Object::Component::Transform>(core, {});
+        transform.rotation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+    }
+
+    void CreateCamera(ES::Engine::Core &core)
+    {
+        auto &camera = core.RegisterResource<Camera>(Camera(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+    }
+
+    struct Light {
+        glm::vec4 Position;
+        glm::vec3 Intensity;
+    };
+    
+    void UpdateMatrices(ES::Engine::Core &core)
+    {
+        auto &cam = core.GetResource<Camera>();
+        cam.view = glm::lookAt(cam.viewer.getViewPoint(), cam.viewer.getViewCenter(), cam.viewer.getUpVector());
+        cam.projection = glm::perspective(glm::radians(45.0f), cam.size.x / cam.size.y, 0.1f, 100.0f);
+    }
+    
+    void GLClearColor(ES::Engine::Core &core)
+    {
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+    
+    void GLClearDepth(ES::Engine::Core &core)
+    {
+        glClear(GL_DEPTH_BUFFER_BIT);
+    }
+    
+    void GLEnableDepth(ES::Engine::Core &core)
+    {
+        glEnable(GL_DEPTH_TEST);
+    }
+    
+    void GLEnableCullFace(ES::Engine::Core &core)
+    {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+    }
+    
+    void SetupLights(ES::Engine::Core &core)
+    {
+        core.GetResource<ShaderManager>().use("default");
+    
+        Light light[] = {
+            {glm::vec4(0, 0, 0, 1), glm::vec3(0.0f, 0.8f, 0.8f)},
+            {glm::vec4(0, 0, 0, 1), glm::vec3(0.0f, 0.0f, 0.8f)},
+            {glm::vec4(0, 0, 0, 1), glm::vec3(0.8f, 0.0f, 0.0f)},
+            {glm::vec4(0, 0, 0, 1), glm::vec3(0.0f, 0.8f, 0.0f)},
+            {glm::vec4(0, 0, 0, 1), glm::vec3(0.8f, 0.8f, 0.8f)}
+        };
+    
+        float nbr_lights = 5.f;
+        float scale = 2.f * glm::pi<float>() / nbr_lights;
+    
+        light[0].Position = glm::vec4( 5.f * cosf(scale * 0.f), 5.f, 5.f * sinf(scale * 0.f), 1.f);
+        light[1].Position = glm::vec4( 5.f * cosf(scale * 1.f), 5.f, 5.f * sinf(scale * 1.f), 1.f);
+        light[2].Position = glm::vec4( 5.f * cosf(scale * 2.f), 5.f, 5.f * sinf(scale * 2.f), 1.f);
+        light[3].Position = glm::vec4( 5.f * cosf(scale * 3.f), 5.f, 5.f * sinf(scale * 3.f), 1.f);
+        light[4].Position = glm::vec4( 5.f * cosf(scale * 4.f), 5.f, 5.f * sinf(scale * 4.f), 1.f);
+        
+        auto &shaderProgram = core.GetResource<ShaderManager>().get("default");
+        for (int i = 0; i < 5; i++) {
+            glUniform4fv(shaderProgram.uniform("Light[" + std::to_string(i) + "].Position"), 1, glm::value_ptr(light[i].Position));
+            glUniform3fv(shaderProgram.uniform("Light[" + std::to_string(i) + "].Intensity"), 1, glm::value_ptr(light[i].Intensity));
+        }
+        glUniform3fv(shaderProgram.uniform("CamPos"), 1, glm::value_ptr(core.GetResource<Camera>().viewer.getViewPoint()));
+        
+        core.GetResource<ShaderManager>().disable("default");
+    }
+    
+    void RenderMeshes(ES::Engine::Core &core)
+    {
+        auto &view = core.GetResource<Camera>().view;
+        auto &projection = core.GetResource<Camera>().projection;
+        core.GetRegistry().view<Model, ES::Plugin::Object::Component::Transform>().each([&](auto entity, Model &model, ES::Plugin::Object::Component::Transform &transform) {
+            auto &shader = core.GetResource<ShaderManager>().get(model.shaderName);
+            const auto material = core.GetResource<MaterialCache>().get(model.materialName);
+            shader.use();
+            glUniform3fv(shader.uniform("Material.Ka"), 1, glm::value_ptr(material.Ka));
+            glUniform3fv(shader.uniform("Material.Kd"), 1, glm::value_ptr(material.Kd));
+            glUniform3fv(shader.uniform("Material.Ks"), 1, glm::value_ptr(material.Ks));
+            glUniform1fv(shader.uniform("Material.Shiness"), 1, &material.Shiness);
+            glm::mat4 modelmat = transform.getTransformationMatrix();
+            glm::mat4 mview = view * modelmat;
+            glm::mat4 mvp = projection * view * modelmat;
+            glm::mat4 imvp = glm::inverse(modelmat);
+            glm::mat3 nmat = glm::mat3(glm::transpose(imvp)); //normal matrix
+            glUniformMatrix3fv(shader.uniform("NormalMatrix"), 1, GL_FALSE, glm::value_ptr(nmat));
+            glUniformMatrix4fv(shader.uniform("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(modelmat));
+            glUniformMatrix4fv(shader.uniform("MVP"), 1, GL_FALSE, glm::value_ptr(mvp));
+            model.mesh.draw();
+            shader.disable();
+        });
+    }
 }
 
 
@@ -283,11 +440,13 @@ int main()
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::InitGL3W);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::CheckGL3WVersion);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::GLFWEnableVSync);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::InitCustomWindow);
+    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupGLFWHints);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadMaterialCache);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadShaderManager);
+    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::CreateCamera);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupShaderUniforms);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::TESTAddQuad);
+    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::TESTAddTorus);
 
     core.RunSystems();
 
@@ -295,7 +454,13 @@ int main()
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::UpdatePosCursor);
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::UpdateButton);
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::SaveLastMousePos);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::Draw);
+    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::UpdateMatrices);
+    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLClearColor);
+    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLClearDepth);
+    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLEnableDepth);
+    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLEnableCullFace);
+    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::SetupLights);
+    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::RenderMeshes);
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::SwapBuffers);
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::PollEvents);
     core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::MouseDragging);
