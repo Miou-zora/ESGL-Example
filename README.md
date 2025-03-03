@@ -1,1 +1,1 @@
-# Engine Squared Open GL
+# Engine Squared Open GL Renderer

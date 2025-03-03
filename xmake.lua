@@ -4,7 +4,8 @@ set_project("ESGL-App")
 set_languages("c++20")
 
 includes("../EngineSquared/xmake.lua")
-includes("src/plugin/ESGL/xmake.lua")
+includes("../ESGL/xmake.lua")
+-- includes("src/plugin/ESGL/xmake.lua")
 
 target("ESGL-App")
     set_kind("binary")
@@ -12,7 +13,7 @@ target("ESGL-App")
     add_deps("EngineSquared")
     add_deps("ESGL")
 
-    add_files("src/app/**.cpp")
+    add_files("src/**.cpp")
     add_includedirs("$(projectdir)/src/")
 
     add_packages("entt", "vulkansdk", "glm", "glfw", "vcpkg::gl3w")
