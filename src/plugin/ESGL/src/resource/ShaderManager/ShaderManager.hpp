@@ -1,5 +1,5 @@
 #pragma once
-#include "Loader.h"
+#include "Loader.hpp"
 
 class ShaderManager {
     public:

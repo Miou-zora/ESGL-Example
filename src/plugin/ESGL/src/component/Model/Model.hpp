@@ -9,9 +9,9 @@
 #include <vector>
 #include <array>
 
-#include "Loader.h"
+#include "Loader.hpp"
 #include "Material.hpp"
-#include "Mesh/Mesh.hpp"
+#include "utils/Mesh/Mesh.hpp"
 
 struct Model {
     std::string shaderName;

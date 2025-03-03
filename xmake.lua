@@ -1,28 +1,19 @@
 add_requires("entt", "vulkan-headers", "vulkansdk", "vulkan-hpp", "gtest", "glm >=1.0.1", "glfw >=3.4", "vcpkg::gl3w >=v2018-05-31#5")
 
-set_project("ESGL")
+set_project("ESGL-App")
 set_languages("c++20")
 
-includes("../../Github/EngineSquared/xmake.lua")
+includes("../EngineSquared/xmake.lua")
+includes("src/plugin/ESGL/xmake.lua")
 
-target("ESGL")
+target("ESGL-App")
     set_kind("binary")
     set_default(true)
     add_deps("EngineSquared")
+    add_deps("ESGL")
 
-    add_files("src/**.cpp")
-
-
+    add_files("src/app/**.cpp")
     add_includedirs("$(projectdir)/src/")
-    add_includedirs("$(projectdir)/src/Material/")
-    add_includedirs("$(projectdir)/src/Model/")
-    add_includedirs("$(projectdir)/src/Viewer/")
-    add_includedirs("$(projectdir)/src/Mesh/")
-    add_includedirs("$(projectdir)/src/ShaderManager/")
-    add_includedirs("$(projectdir)/src/MaterialCache/")
-    add_includedirs("$(projectdir)/src/Camera/")
-    add_headerfiles("$(projectdir)/src/**.h")
-
 
     add_packages("entt", "vulkansdk", "glm", "glfw", "vcpkg::gl3w")
 

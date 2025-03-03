@@ -9,7 +9,7 @@
 #include <vector>
 #include <array>
 
-#include "Loader.h"
+#include "Loader.hpp"
 #include "Material.hpp"
 
 class Mesh {
