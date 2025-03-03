@@ -10,6 +10,7 @@ static float DEFAULT_ZOOM_FRACTION = 2.5;
 static float DEFAULT_ROTATE_SPEED = 2.0;
 
 using namespace std;
+using namespace ESGL;
 
 Viewer::Viewer(
 	const glm::vec3 &viewPoint, const glm::vec3 &viewCenter, const glm::vec3 &upVector,

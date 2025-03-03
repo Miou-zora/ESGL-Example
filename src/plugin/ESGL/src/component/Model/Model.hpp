@@ -13,8 +13,10 @@
 #include "Material.hpp"
 #include "utils/Mesh/Mesh.hpp"
 
-struct Model {
-    std::string shaderName;
-    std::string materialName;
-    Mesh mesh;
-};
+namespace ESGL {
+    struct Model {
+        std::string shaderName;
+        std::string materialName;
+        Mesh mesh;
+    };
+}

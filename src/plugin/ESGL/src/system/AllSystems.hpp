@@ -7,37 +7,17 @@
 #include "Object.hpp"
 #include "Entity.hpp"
 #include "component/Transform.hpp"
+#include "ESGLFWWINDOW.hpp"
 #include "resource/Camera/Camera.hpp"
+#include "resource/Buttons/Buttons.hpp"
 
 namespace ESGL {
     const int DEFAULT_WIDTH = 800;
     const int DEFAULT_HEIGHT = 800;
 
-    struct ESGLFWWINDOW
-    {
-        GLFWwindow *window;
-    };
-    
-    struct Button
-    {
-        bool pressed = false;
-        bool updated = false;
-    };
-
-    struct Buttons
-    {
-        std::map<int, Button> mouse = {
-            {GLFW_MOUSE_BUTTON_LEFT, Button()},
-            {GLFW_MOUSE_BUTTON_RIGHT, Button()},
-            {GLFW_MOUSE_BUTTON_MIDDLE, Button()}
-        };
-        glm::vec<2, double, glm::defaultp> lastMousePos = {0.0f, 0.0f};
-        glm::vec<2, double, glm::defaultp> currentMousePos = {0.0f, 0.0f};
-    };
-
     void UpdateKey(ES::Engine::Core &core)
     {
-        GLFWwindow *window = core.GetResource<ESGLFWWINDOW>().window;
+        GLFWwindow *window = core.GetResource<ESGL::ESGLFWWINDOW>().window;
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
@@ -58,7 +38,7 @@ namespace ESGL {
         auto &buttons = core.GetResource<ESGL::Buttons>();
         auto &lastMousePos = buttons.lastMousePos;
         auto &mouseButtons = buttons.mouse;
-        auto window = core.GetResource<ESGLFWWINDOW>().window;
+        auto window = core.GetResource<ESGL::ESGLFWWINDOW>().window;
         if (mouseButtons[GLFW_MOUSE_BUTTON_LEFT].updated ||
             mouseButtons[GLFW_MOUSE_BUTTON_MIDDLE].updated ||
             mouseButtons[GLFW_MOUSE_BUTTON_RIGHT].updated) {
@@ -86,7 +66,7 @@ namespace ESGL {
 
     void CreateGLFWWindow(ES::Engine::Core &core)
     {
-        if (!core.RegisterResource<ESGLFWWINDOW>({glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "OpenGL Framework", NULL, NULL)}).window) {
+        if (!core.RegisterResource<ESGL::ESGLFWWINDOW>({glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "OpenGL Framework", NULL, NULL)}).window) {
             glfwTerminate();
             std::cerr << "Failed to create GLFW window" << std::endl;
             return;
@@ -95,7 +75,7 @@ namespace ESGL {
 
     void LinkGLFWContextToGL(ES::Engine::Core &core)
     {
-        glfwMakeContextCurrent(core.GetResource<ESGLFWWINDOW>().window);
+        glfwMakeContextCurrent(core.GetResource<ESGL::ESGLFWWINDOW>().window);
     }
 
     void InitGL3W(ES::Engine::Core &core)
@@ -122,7 +102,7 @@ namespace ESGL {
     void UpdatePosCursor(ES::Engine::Core &core)
     {
         auto &currentMousePos = core.GetResource<ESGL::Buttons>().currentMousePos;
-        glfwGetCursorPos(core.GetResource<ESGLFWWINDOW>().window, &currentMousePos.x, &currentMousePos.y);
+        glfwGetCursorPos(core.GetResource<ESGL::ESGLFWWINDOW>().window, &currentMousePos.x, &currentMousePos.y);
     }
 
     // Function to handle mouse dragging interactions
@@ -153,14 +133,14 @@ namespace ESGL {
 
     void SwapBuffers(ES::Engine::Core &core)
     {
-        glfwSwapBuffers(core.GetResource<ESGLFWWINDOW>().window);
+        glfwSwapBuffers(core.GetResource<ESGL::ESGLFWWINDOW>().window);
     }
-    
+
     void PollEvents(ES::Engine::Core &core)
     {
         glfwPollEvents();
     }
-    
+
     void LoadShaderManager(ES::Engine::Core &core)
     {
         ShaderManager &shaderManager = core.RegisterResource<ShaderManager>(ShaderManager());
@@ -170,12 +150,12 @@ namespace ESGL {
 
     void SetupShaderUniforms(ES::Engine::Core &core) {
         auto &m_shaderProgram = core.GetResource<ShaderManager>().get("default");
-    
+
         // Add uniforms
         m_shaderProgram.addUniform("MVP");
         m_shaderProgram.addUniform("ModelMatrix"); //View*Model : mat4
         m_shaderProgram.addUniform("NormalMatrix"); //Refer next slide : mat3
-    
+
         for (int i = 0; i < 5; i++) {
             m_shaderProgram.addUniform("Light[" + std::to_string(i) + "].Position");
             m_shaderProgram.addUniform("Light[" + std::to_string(i) + "].Intensity");
@@ -184,7 +164,7 @@ namespace ESGL {
         m_shaderProgram.addUniform("Material.Kd");
         m_shaderProgram.addUniform("Material.Ks");
         m_shaderProgram.addUniform("Material.Shiness");
-    
+
         m_shaderProgram.addUniform("CamPos");
     }
 
@@ -203,39 +183,39 @@ namespace ESGL {
         glm::vec4 Position;
         glm::vec3 Intensity;
     };
-    
+
     void UpdateMatrices(ES::Engine::Core &core)
     {
         auto &cam = core.GetResource<Camera>();
         cam.view = glm::lookAt(cam.viewer.getViewPoint(), cam.viewer.getViewCenter(), cam.viewer.getUpVector());
         cam.projection = glm::perspective(glm::radians(45.0f), cam.size.x / cam.size.y, 0.1f, 100.0f);
     }
-    
+
     void GLClearColor(ES::Engine::Core &core)
     {
         glClear(GL_COLOR_BUFFER_BIT);
     }
-    
+
     void GLClearDepth(ES::Engine::Core &core)
     {
         glClear(GL_DEPTH_BUFFER_BIT);
     }
-    
+
     void GLEnableDepth(ES::Engine::Core &core)
     {
         glEnable(GL_DEPTH_TEST);
     }
-    
+
     void GLEnableCullFace(ES::Engine::Core &core)
     {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
     }
-    
+
     void SetupLights(ES::Engine::Core &core)
     {
         core.GetResource<ShaderManager>().use("default");
-    
+
         Light light[] = {
             {glm::vec4(0, 0, 0, 1), glm::vec3(0.0f, 0.8f, 0.8f)},
             {glm::vec4(0, 0, 0, 1), glm::vec3(0.0f, 0.0f, 0.8f)},
@@ -243,10 +223,10 @@ namespace ESGL {
             {glm::vec4(0, 0, 0, 1), glm::vec3(0.0f, 0.8f, 0.0f)},
             {glm::vec4(0, 0, 0, 1), glm::vec3(0.8f, 0.8f, 0.8f)}
         };
-    
+
         float nbr_lights = 5.f;
         float scale = 2.f * glm::pi<float>() / nbr_lights;
-    
+
         light[0].Position = glm::vec4( 5.f * cosf(scale * 0.f), 5.f, 5.f * sinf(scale * 0.f), 1.f);
         light[1].Position = glm::vec4( 5.f * cosf(scale * 1.f), 5.f, 5.f * sinf(scale * 1.f), 1.f);
         light[2].Position = glm::vec4( 5.f * cosf(scale * 2.f), 5.f, 5.f * sinf(scale * 2.f), 1.f);
@@ -268,7 +248,7 @@ namespace ESGL {
         glUniform3fv(shaderProgram.uniform("CamPos"), 1, glm::value_ptr(core.GetResource<Camera>().viewer.getViewPoint()));
         shaderProgram.disable();
     }
-    
+
     void RenderMeshes(ES::Engine::Core &core)
     {
         auto &view = core.GetResource<Camera>().view;

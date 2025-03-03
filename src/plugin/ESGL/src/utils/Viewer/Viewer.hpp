@@ -1,9 +1,9 @@
  // File: Viewer.h
 
 #pragma once
-
+namespace ESGL {
 class Viewer;
-
+}
 /**
  * \brief A class to control the viewing parameters.
  *
@@ -21,7 +21,7 @@ class Viewer;
 
 #include <glm/glm.hpp>
 
-
+namespace ESGL {
 class Viewer {
 	public:
 
@@ -168,3 +168,4 @@ class Viewer {
 		 */
 		void getFrustrumInfo();
 };
+}

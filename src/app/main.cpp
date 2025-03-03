@@ -18,12 +18,12 @@ void TESTAddQuad(ES::Engine::Core &core)
 
     auto quad = ES::Engine::Entity(core.GetRegistry().create());
 
-    Model model;
+    ESGL::Model model;
 
     model.shaderName = "default";
     model.materialName = "default";
 
-    Mesh mesh;
+    ESGL::Mesh mesh;
 
     std::vector<vec3> vertices;
     std::vector<vec3> normals;
@@ -56,7 +56,7 @@ void TESTAddQuad(ES::Engine::Core &core)
     model.mesh = mesh;
 
 
-    quad.AddComponent<Model>(core, model);
+    quad.AddComponent<ESGL::Model>(core, model);
     auto &transform = quad.AddComponent<ES::Plugin::Object::Component::Transform>(core, {});
     
     transform.position = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -64,7 +64,7 @@ void TESTAddQuad(ES::Engine::Core &core)
     transform.scale = glm::vec3(10.0f, 10.0f, 10.0f);
 }
 
-void TESTGenerateData(Mesh &mesh, float outerRadius, float innerRadius)
+void TESTGenerateData(ESGL::Mesh &mesh, float outerRadius, float innerRadius)
 {
     using namespace glm;
 
@@ -111,19 +111,19 @@ void TESTAddTorus(ES::Engine::Core &core)
     using namespace glm;
 
     auto torus = ES::Engine::Entity(core.GetRegistry().create());
-    auto &mat = core.GetResource<MaterialCache>().add("TESTTorus");
+    auto &mat = core.GetResource<ESGL::MaterialCache>().add("TESTTorus");
     mat.Shiness = 180.0f;
     mat.Ka = vec3(0.1, 0.1, 0.1);
     mat.Kd = vec3(0.4, 0.4, 0.4);
     mat.Ks = vec3(0.9,0.9, 0.9);
     
 
-    Model model;
+    ESGL::Model model;
 
     model.shaderName = "default";
     model.materialName = "TESTTorus";
 
-    Mesh mesh;
+    ESGL::Mesh mesh;
 
     TESTGenerateData(mesh, 1.5f, 0.3f);
     mesh.generateGlBuffers();
@@ -131,7 +131,7 @@ void TESTAddTorus(ES::Engine::Core &core)
     model.mesh = mesh;
 
 
-    torus.AddComponent<Model>(core, model);
+    torus.AddComponent<ESGL::Model>(core, model);
     auto &transform = torus.AddComponent<ES::Plugin::Object::Component::Transform>(core, {});
     transform.rotation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
 }
