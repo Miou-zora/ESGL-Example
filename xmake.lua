@@ -1,11 +1,10 @@
-add_requires("entt", "vulkan-headers", "vulkansdk", "vulkan-hpp", "gtest", "glm >=1.0.1", "glfw >=3.4", "vcpkg::gl3w >=v2018-05-31#5")
+add_requires("entt", "vulkan-headers", "vulkansdk", "vulkan-hpp", "gtest", "glm >=1.0.1", "glfw >=3.4", "glew")
 
 set_project("ESGL-App")
 set_languages("c++20")
 
 includes("../EngineSquared/xmake.lua")
 includes("../ESGL/xmake.lua")
--- includes("src/plugin/ESGL/xmake.lua")
 
 target("ESGL-App")
     set_kind("binary")
@@ -16,7 +15,7 @@ target("ESGL-App")
     add_files("src/**.cpp")
     add_includedirs("$(projectdir)/src/")
 
-    add_packages("entt", "vulkansdk", "glm", "glfw", "vcpkg::gl3w")
+    add_packages("entt", "vulkansdk", "glm", "glfw", "glew")
 
     set_rundir("$(projectdir)")
 

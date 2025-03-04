@@ -146,8 +146,8 @@ int main()
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupGLFWHints);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::CreateGLFWWindow);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LinkGLFWContextToGL);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::InitGL3W);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::CheckGL3WVersion);
+    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::InitGLEW);
+    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::CheckGLEWVersion);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::GLFWEnableVSync);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupGLFWHints);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadMaterialCache);
