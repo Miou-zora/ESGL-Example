@@ -111,7 +111,7 @@ void TESTAddTorus(ES::Engine::Core &core)
     using namespace glm;
 
     auto torus = ES::Engine::Entity(core.GetRegistry().create());
-    auto &mat = core.GetResource<ESGL::MaterialCache>().add("TESTTorus");
+    auto &mat = core.GetResource<ESGL::MaterialCache>().Add(entt::hashed_string("TESTTorus"), std::move(ESGL::Material()));
     mat.Shiness = 180.0f;
     mat.Ka = vec3(0.1, 0.1, 0.1);
     mat.Kd = vec3(0.4, 0.4, 0.4);

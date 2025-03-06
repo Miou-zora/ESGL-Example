@@ -1,10 +1,17 @@
-add_requires("entt", "vulkan-headers", "vulkansdk", "vulkan-hpp", "gtest", "glm >=1.0.1", "glfw >=3.4", "glew")
+add_requires("entt", "vulkan-headers", "vulkansdk", "vulkan-hpp", "gtest", "glm >=1.0.1", "glfw >=3.4", "glew", "spdlog")
 
 set_project("ESGL-App")
 set_languages("c++20")
 
+add_rules("mode.debug", "mode.release")
+
 includes("../EngineSquared/xmake.lua")
 includes("../ESGL/xmake.lua")
+
+-- add /W4 for windows
+if is_plat("windows") then
+    add_cxflags("/W4")
+end
 
 target("ESGL-App")
     set_kind("binary")
@@ -15,7 +22,7 @@ target("ESGL-App")
     add_files("src/**.cpp")
     add_includedirs("$(projectdir)/src/")
 
-    add_packages("entt", "vulkansdk", "glm", "glfw", "glew")
+    add_packages("entt", "vulkansdk", "glm", "glfw", "glew", "spdlog")
 
     set_rundir("$(projectdir)")
 
