@@ -11,6 +11,7 @@
  */
 
 #include "ESGL.hpp"
+#include "Startup.hpp"
 
 void TESTAddQuad(ES::Engine::Core &core)
 {

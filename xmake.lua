@@ -1,4 +1,4 @@
-add_requires("entt", "vulkan-headers", "vulkansdk", "vulkan-hpp", "gtest", "glm >=1.0.1", "glfw >=3.4", "glew", "spdlog")
+add_requires("entt", "vulkan-headers", "vulkansdk", "vulkan-hpp", "gtest", "glm >=1.0.1", "glfw >=3.4", "glew", "spdlog", "fmt")
 
 set_project("ESGL-App")
 set_languages("c++20")
@@ -22,7 +22,7 @@ target("ESGL-App")
     add_files("src/**.cpp")
     add_includedirs("$(projectdir)/src/")
 
-    add_packages("entt", "vulkansdk", "glm", "glfw", "glew", "spdlog")
+    add_packages("entt", "vulkansdk", "glm", "glfw", "glew", "spdlog", "fmt")
 
     set_rundir("$(projectdir)")
 
