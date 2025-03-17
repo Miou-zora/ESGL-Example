@@ -10,7 +10,9 @@
  * - Local plugin and global xmake require to put the hard path of the engine.
  */
 
-#include "ESGL.hpp"
+#include "Core.hpp"
+#include "Entity.hpp"
+#include "OpenGL.hpp"
 #include "Startup.hpp"
 
 void TESTAddQuad(ES::Engine::Core &core)
@@ -19,12 +21,12 @@ void TESTAddQuad(ES::Engine::Core &core)
 
     auto quad = ES::Engine::Entity(core.GetRegistry().create());
 
-    ESGL::Model model;
+    ES::Plugin::OpenGL::Component::Model model;
 
     model.shaderName = "default";
     model.materialName = "default";
 
-    ESGL::Mesh mesh;
+    ES::Plugin::OpenGL::Utils::Mesh mesh;
 
     std::vector<vec3> vertices;
     std::vector<vec3> normals;
@@ -57,7 +59,7 @@ void TESTAddQuad(ES::Engine::Core &core)
     model.mesh = mesh;
 
 
-    quad.AddComponent<ESGL::Model>(core, model);
+    quad.AddComponent<ES::Plugin::OpenGL::Component::Model>(core, model);
     auto &transform = quad.AddComponent<ES::Plugin::Object::Component::Transform>(core, {});
     
     transform.position = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -65,7 +67,7 @@ void TESTAddQuad(ES::Engine::Core &core)
     transform.scale = glm::vec3(10.0f, 10.0f, 10.0f);
 }
 
-void TESTGenerateData(ESGL::Mesh &mesh, float outerRadius, float innerRadius)
+void TESTGenerateData(ES::Plugin::OpenGL::Utils::Mesh &mesh, float outerRadius, float innerRadius)
 {
     using namespace glm;
 
@@ -112,19 +114,19 @@ void TESTAddTorus(ES::Engine::Core &core)
     using namespace glm;
 
     auto torus = ES::Engine::Entity(core.GetRegistry().create());
-    auto &mat = core.GetResource<ESGL::MaterialCache>().Add(entt::hashed_string("TESTTorus"), std::move(ESGL::Material()));
+    auto &mat = core.GetResource<ES::Plugin::OpenGL::Resource::MaterialCache>().Add(entt::hashed_string("TESTTorus"), std::move(ES::Plugin::OpenGL::Utils::Material()));
     mat.Shiness = 180.0f;
     mat.Ka = vec3(0.1, 0.1, 0.1);
     mat.Kd = vec3(0.4, 0.4, 0.4);
     mat.Ks = vec3(0.9,0.9, 0.9);
     
 
-    ESGL::Model model;
+    ES::Plugin::OpenGL::Component::Model model;
 
     model.shaderName = "default";
     model.materialName = "TESTTorus";
 
-    ESGL::Mesh mesh;
+    ES::Plugin::OpenGL::Utils::Mesh mesh;
 
     TESTGenerateData(mesh, 1.5f, 0.3f);
     mesh.generateGlBuffers();
@@ -132,7 +134,7 @@ void TESTAddTorus(ES::Engine::Core &core)
     model.mesh = mesh;
 
 
-    torus.AddComponent<ESGL::Model>(core, model);
+    torus.AddComponent<ES::Plugin::OpenGL::Component::Model>(core, model);
     auto &transform = torus.AddComponent<ES::Plugin::Object::Component::Transform>(core, {});
     transform.rotation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
 }
@@ -141,47 +143,18 @@ int main()
 {
     ES::Engine::Core core;
 
-    core.RegisterResource<ESGL::Buttons>({});
-
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::InitGLFW);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupGLFWHints);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::CreateGLFWWindow);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LinkGLFWContextToGL);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::InitGLEW);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::CheckGLEWVersion);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::GLFWEnableVSync);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupGLFWHints);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadMaterialCache);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::LoadShaderManager);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::CreateCamera);
-    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ESGL::SetupShaderUniforms);
+    core.AddPlugins<ES::Plugin::OpenGL::Plugin>();
 
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(TESTAddQuad);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(TESTAddTorus);
 
     core.RunSystems();
 
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::UpdateKey);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::UpdatePosCursor);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::UpdateButton);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::SaveLastMousePos);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::UpdateMatrices);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLClearColor);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLClearDepth);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLEnableDepth);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::GLEnableCullFace);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::SetupCamera);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::SetupLights);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::RenderMeshes);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::SwapBuffers);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::PollEvents);
-    core.RegisterSystem<ES::Engine::Scheduler::Update>(ESGL::MouseDragging);
-
-    while (!glfwWindowShouldClose(core.GetResource<ESGL::ESGLFWWINDOW>().window)) {
+    while (!glfwWindowShouldClose(core.GetResource<ES::Plugin::OpenGL::Resource::GLFWWindow>().window)) {
         core.RunSystems();
     }
 
-    glfwDestroyWindow(core.GetResource<ESGL::ESGLFWWINDOW>().window);
+    glfwDestroyWindow(core.GetResource<ES::Plugin::OpenGL::Resource::GLFWWindow>().window);
     glfwTerminate();
 
     return 0;

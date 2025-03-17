@@ -6,7 +6,6 @@ set_languages("c++20")
 add_rules("mode.debug", "mode.release")
 
 includes("../EngineSquared/xmake.lua")
-includes("../ESGL/xmake.lua")
 
 -- add /W4 for windows
 if is_plat("windows") then
@@ -17,7 +16,6 @@ target("ESGL-App")
     set_kind("binary")
     set_default(true)
     add_deps("EngineSquared")
-    add_deps("ESGL")
 
     add_files("src/**.cpp")
     add_includedirs("$(projectdir)/src/")
