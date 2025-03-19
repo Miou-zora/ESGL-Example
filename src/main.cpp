@@ -14,6 +14,7 @@
 #include "Entity.hpp"
 #include "OpenGL.hpp"
 #include "Startup.hpp"
+#include "UI.hpp"
 
 void TESTAddQuad(ES::Engine::Core &core)
 {
@@ -21,12 +22,7 @@ void TESTAddQuad(ES::Engine::Core &core)
 
     auto quad = ES::Engine::Entity(core.GetRegistry().create());
 
-    ES::Plugin::OpenGL::Component::Model model;
-
-    model.shaderName = "default";
-    model.materialName = "default";
-
-    ES::Plugin::OpenGL::Utils::Mesh mesh;
+    ES::Plugin::OpenGL::Component::Mesh mesh;
 
     std::vector<vec3> vertices;
     std::vector<vec3> normals;
@@ -56,18 +52,19 @@ void TESTAddQuad(ES::Engine::Core &core)
     mesh.triIndices = triIndices;
     mesh.generateGlBuffers();
 
-    model.mesh = mesh;
 
+    quad.AddComponent<ES::Plugin::OpenGL::Component::Mesh>(core, mesh);
+    quad.AddComponent<ES::Plugin::OpenGL::Component::Shader>(core, ES::Plugin::OpenGL::Component::Shader{"default"});
+    quad.AddComponent<ES::Plugin::OpenGL::Component::Material>(core, ES::Plugin::OpenGL::Component::Material{"default"});
 
-    quad.AddComponent<ES::Plugin::OpenGL::Component::Model>(core, model);
     auto &transform = quad.AddComponent<ES::Plugin::Object::Component::Transform>(core, {});
-    
+
     transform.position = glm::vec3(0.0f, -1.0f, 0.0f);
     transform.rotation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
     transform.scale = glm::vec3(10.0f, 10.0f, 10.0f);
 }
 
-void TESTGenerateData(ES::Plugin::OpenGL::Utils::Mesh &mesh, float outerRadius, float innerRadius)
+void TESTGenerateData(ES::Plugin::OpenGL::Component::Mesh &mesh, float outerRadius, float innerRadius)
 {
     using namespace glm;
 
@@ -108,35 +105,33 @@ void TESTGenerateData(ES::Plugin::OpenGL::Utils::Mesh &mesh, float outerRadius, 
         }
     }
 }
-    
+
 void TESTAddTorus(ES::Engine::Core &core)
 {
     using namespace glm;
 
     auto torus = ES::Engine::Entity(core.GetRegistry().create());
-    auto &mat = core.GetResource<ES::Plugin::OpenGL::Resource::MaterialCache>().Add(entt::hashed_string("TESTTorus"), std::move(ES::Plugin::OpenGL::Utils::Material()));
+    auto &mat = core.GetResource<ES::Plugin::OpenGL::Resource::MaterialCache>().Add(entt::hashed_string("TESTTorus"), std::move(ES::Plugin::OpenGL::Utils::MaterialData()));
     mat.Shiness = 180.0f;
     mat.Ka = vec3(0.1, 0.1, 0.1);
     mat.Kd = vec3(0.4, 0.4, 0.4);
     mat.Ks = vec3(0.9,0.9, 0.9);
-    
 
-    ES::Plugin::OpenGL::Component::Model model;
-
-    model.shaderName = "default";
-    model.materialName = "TESTTorus";
-
-    ES::Plugin::OpenGL::Utils::Mesh mesh;
+    ES::Plugin::OpenGL::Component::Mesh mesh;
 
     TESTGenerateData(mesh, 1.5f, 0.3f);
     mesh.generateGlBuffers();
 
-    model.mesh = mesh;
-
-
-    torus.AddComponent<ES::Plugin::OpenGL::Component::Model>(core, model);
+    torus.AddComponent<ES::Plugin::OpenGL::Component::Mesh>(core, mesh);
+    torus.AddComponent<ES::Plugin::OpenGL::Component::Shader>(core, ES::Plugin::OpenGL::Component::Shader{"default"});
+    torus.AddComponent<ES::Plugin::OpenGL::Component::Material>(core, ES::Plugin::OpenGL::Component::Material{"TESTTorus"});
     auto &transform = torus.AddComponent<ES::Plugin::Object::Component::Transform>(core, {});
     transform.rotation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+}
+
+void TESTAddText(ES::Engine::Core &core)
+{
+    auto text = ES::Engine::Entity(core.GetRegistry().create());
 }
 
 int main()
@@ -147,6 +142,7 @@ int main()
 
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(TESTAddQuad);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(TESTAddTorus);
+    core.RegisterSystem<ES::Engine::Scheduler::Startup>(TESTAddText);
 
     core.RunSystems();
 
