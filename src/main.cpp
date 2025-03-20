@@ -14,6 +14,7 @@
 #include "Entity.hpp"
 #include "OpenGL.hpp"
 #include "Startup.hpp"
+#include "Window.hpp"
 
 void TESTAddQuad(ES::Engine::Core &core)
 {
@@ -148,13 +149,9 @@ int main()
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(TESTAddQuad);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(TESTAddTorus);
 
-    core.RunSystems();
+    core.RunCore();
 
-    while (!glfwWindowShouldClose(core.GetResource<ES::Plugin::OpenGL::Resource::GLFWWindow>().window)) {
-        core.RunSystems();
-    }
-
-    glfwDestroyWindow(core.GetResource<ES::Plugin::OpenGL::Resource::GLFWWindow>().window);
+    glfwDestroyWindow(core.GetResource<ES::Plugin::Window::Resource::Window>().GetGLFWWindow());
     glfwTerminate();
 
     return 0;
