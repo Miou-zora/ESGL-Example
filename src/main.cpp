@@ -32,10 +32,10 @@ void TESTAddQuad(ES::Engine::Core &core)
 
     ES::Plugin::Object::Component::Mesh mesh;
 
-    mesh.vertices = {ES::Plugin::Object::Component::Vertex(glm::vec3(-1, 1, 0), glm::vvec3(0, 0, -1)),
-                ES::Plugin::Object::Component::Vertex(glm::vvec3(1, 1, 0), glm::vvec3(0, 0, -1)),
-                ES::Plugin::Object::Component::Vertex(vglm::vec3(-1, -1, 0), glm::vvec3(0, 0, -1)),
-                ES::Plugin::Object::Component::Vertex(glm::vvec3(1, -1, 0), glm::vvec3(0, 0, -1))};
+    mesh.vertices = {ES::Plugin::Object::Component::Vertex(glm::vec3(-1, 1, 0), glm::vec3(0, 0, -1)),
+                ES::Plugin::Object::Component::Vertex(glm::vec3(1, 1, 0), glm::vec3(0, 0, -1)),
+                ES::Plugin::Object::Component::Vertex(glm::vec3(-1, -1, 0), glm::vec3(0, 0, -1)),
+                ES::Plugin::Object::Component::Vertex(glm::vec3(1, -1, 0), glm::vec3(0, 0, -1))};
 
     mesh.indices = {2, 0, 1, 2, 1, 3};
 
@@ -72,10 +72,9 @@ void TESTGenerateData(ES::Plugin::Object::Component::Mesh &mesh, float outerRadi
             float sv = sin(v);
             float r = (outerRadius + innerRadius * cv);
             // Normalize
-            float len = sqrt( mesh.normals[idx].x * mesh.normals[idx].x +
-                            mesh.normals[idx].y * mesh.normals[idx].y +
-                            mesh.normals[idx].z * mesh.normals[idx].z );
-            glm::vec3 normal = vec3(cv * cu * r, cv * su * r, sv * r) / len;
+            glm::vec3 normal = vec3(cv * cu * r, cv * su * r, sv * r);
+            float len = sqrt( normal.x * normal.x + normal.y * normal.y + normal.z * normal.z );
+            normal /= / len;
             mesh.vertices.emplace_back(ES::Plugin::Object::Component::Vertex(vec3(r * cu, r * su, innerRadius * sv), normal));
             idx += 1;
         }
