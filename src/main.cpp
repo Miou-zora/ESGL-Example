@@ -28,7 +28,7 @@ void TESTAddQuad(ES::Engine::Core &core)
 
     model.shaderName = "default";
     model.materialName = "default";
-    model.glbufferName = "default";
+    model.meshName = "default";
 
     ES::Plugin::Object::Component::Mesh mesh;
 
@@ -39,8 +39,7 @@ void TESTAddQuad(ES::Engine::Core &core)
 
     mesh.indices = {2, 0, 1, 2, 1, 3};
 
-    model.generateGlBuffers(mesh);
-
+    quad.AddComponent<ES::Plugin::Object::Component::Mesh>(core, mesh);
     quad.AddComponent<ES::Plugin::OpenGL::Component::Model>(core, model);
     auto &transform = quad.AddComponent<ES::Plugin::Object::Component::Transform>(core, {});
 
@@ -60,32 +59,38 @@ void TESTGenerateData(ES::Plugin::Object::Component::Mesh &mesh, float outerRadi
 
     float ringFactor  = (float)(TWOPI / 100);
     float sideFactor = (float)(TWOPI / 100);
-    int idx = 0, tidx = 0;
+    uint32_t idx = 0, tidx = 0;
 
-    for( int ring = 0; ring <= 100; ring++ ) {
+    for (uint32_t ring = 0; ring <= 100; ring++)
+    {
         float u = ring * ringFactor;
         float cu = cos(u);
         float su = sin(u);
-        for( int side = 0; side < 100; side++ ) {
+
+        for (uint32_t side = 0; side < 100; side++)
+        {
             float v = side * sideFactor;
             float cv = cos(v);
             float sv = sin(v);
             float r = (outerRadius + innerRadius * cv);
             // Normalize
             glm::vec3 normal = vec3(cv * cu * r, cv * su * r, sv * r);
-            float len = sqrt( normal.x * normal.x + normal.y * normal.y + normal.z * normal.z );
-            normal /= / len;
+            float len = sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+            normal /= len;
             mesh.vertices.emplace_back(ES::Plugin::Object::Component::Vertex(vec3(r * cu, r * su, innerRadius * sv), normal));
             idx += 1;
         }
     }
 
     idx = 0;
-    for( int ring = 0; ring < 100; ring++ ) {
-        int ringStart = ring * 100;
-        int nextRingStart = (ring + 1) * 100;
-        for( int side = 0; side < 100; side++ ) {
-            int nextSide = (side+1) % 100;
+    for (uint32_t ring = 0; ring < 100; ring++)
+    {
+        uint32_t ringStart = ring * 100;
+        uint32_t nextRingStart = (ring + 1) * 100;
+
+        for (uint32_t side = 0; side < 100; side++)
+        {
+            uint32_t nextSide = (side+1) % 100;
             // The quad
             mesh.indices.insert(mesh.indices.end(), {ringStart + side, nextRingStart + side, nextRingStart + nextSide});
             mesh.indices.insert(mesh.indices.end(), {ringStart + side, nextRingStart + nextSide, ringStart + nextSide});
@@ -108,13 +113,13 @@ void TESTAddTorus(ES::Engine::Core &core)
 
     model.shaderName = "default";
     model.materialName = "TESTTorus";
-    model.glbufferName = "TESTTorus";
+    model.meshName = "TESTTorus";
 
     ES::Plugin::Object::Component::Mesh mesh;
 
     TESTGenerateData(mesh, 1.5f, 0.3f);
-    model.generateGlBuffers(mesh);
 
+    torus.AddComponent<ES::Plugin::Object::Component::Mesh>(core, mesh);
     torus.AddComponent<ES::Plugin::OpenGL::Component::Model>(core, model);
     auto &transform = torus.AddComponent<ES::Plugin::Object::Component::Transform>(core, {});
     transform.rotation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
@@ -128,6 +133,8 @@ int main()
 
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(TESTAddQuad);
     core.RegisterSystem<ES::Engine::Scheduler::Startup>(TESTAddTorus);
+
+    core.RegisterSystem<ES::Engine::Scheduler::Startup>(ES::Plugin::OpenGL::System::LoadGLBuffer);
 
     core.RunCore();
 
