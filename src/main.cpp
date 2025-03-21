@@ -32,10 +32,19 @@ void TESTAddQuad(ES::Engine::Core &core)
 
     ES::Plugin::Object::Component::Mesh mesh;
 
-    mesh.vertices = {ES::Plugin::Object::Component::Vertex(glm::vec3(-1, 1, 0), glm::vec3(0, 0, -1)),
-                ES::Plugin::Object::Component::Vertex(glm::vec3(1, 1, 0), glm::vec3(0, 0, -1)),
-                ES::Plugin::Object::Component::Vertex(glm::vec3(-1, -1, 0), glm::vec3(0, 0, -1)),
-                ES::Plugin::Object::Component::Vertex(glm::vec3(1, -1, 0), glm::vec3(0, 0, -1))};
+    mesh.vertices = {
+        glm::vec3(-1, 1, 0),
+        glm::vec3(1, 1, 0),
+        glm::vec3(-1, -1, 0),
+        glm::vec3(1, -1, 0)
+    };
+
+    mesh.normals = {
+        glm::vec3(0, 0, -1),
+        glm::vec3(0, 0, -1),
+        glm::vec3(0, 0, -1),
+        glm::vec3(0, 0, -1)
+    };
 
     mesh.indices = {2, 0, 1, 2, 1, 3};
 
@@ -53,6 +62,7 @@ void TESTGenerateData(ES::Plugin::Object::Component::Mesh &mesh, float outerRadi
     using namespace glm;
 
     mesh.vertices.reserve(100 * 100);
+    mesh.normals.reserve(100 * 100);
     mesh.indices.reserve(100 * 100 * 6);
 
     float TWOPI = 2 * glm::pi<float>();
@@ -72,10 +82,11 @@ void TESTGenerateData(ES::Plugin::Object::Component::Mesh &mesh, float outerRadi
             float sv = sin(v);
             float r = (outerRadius + innerRadius * cv);
             // Normalize
-            glm::vec3 normal = vec3(cv * cu * r, cv * su * r, sv * r);
+            glm::vec3 normal = glm::vec3(cv * cu * r, cv * su * r, sv * r);
             float len = sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
             normal /= len;
-            mesh.vertices.emplace_back(ES::Plugin::Object::Component::Vertex(vec3(r * cu, r * su, innerRadius * sv), normal));
+            mesh.vertices.emplace_back(glm::vec3(r * cu, r * su, innerRadius * sv));
+            mesh.normals.emplace_back(normal);
         }
     }
 
