@@ -59,8 +59,6 @@ void TESTGenerateData(ES::Plugin::Object::Component::Mesh &mesh, float outerRadi
 
     float ringFactor  = (float)(TWOPI / 100);
     float sideFactor = (float)(TWOPI / 100);
-    uint32_t idx = 0, tidx = 0;
-
     for (uint32_t ring = 0; ring <= 100; ring++)
     {
         float u = ring * ringFactor;
@@ -78,11 +76,9 @@ void TESTGenerateData(ES::Plugin::Object::Component::Mesh &mesh, float outerRadi
             float len = sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
             normal /= len;
             mesh.vertices.emplace_back(ES::Plugin::Object::Component::Vertex(vec3(r * cu, r * su, innerRadius * sv), normal));
-            idx += 1;
         }
     }
 
-    idx = 0;
     for (uint32_t ring = 0; ring < 100; ring++)
     {
         uint32_t ringStart = ring * 100;
