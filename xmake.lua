@@ -26,7 +26,7 @@ target("ESGL-App")
 
 
 if is_mode("debug") then
-    add_defines("DEBUG")
+    add_defines("ES_DEBUG")
     set_symbols("debug")
     set_optimize("none")
 end
